@@ -52,11 +52,22 @@ class FoglalasKezelo:
     def listaz(self):
         return self.foglalasok
 
+    def ellenoriz(self, szoba, datum):
+        # Ellenőrizd, hogy a dátum jövőbeli-e és a szoba elérhető-e
+        return datetime.now() < datum and szoba not in [foglalas.szoba for foglalas in self.foglalasok]
+
 # Szálloda, szobák és foglalások inicializálása
 szalloda = Szalloda("Hotel Luna*****")
 szalloda.add_szoba(EgyagyasSzoba(101))
+szalloda.add_szoba(EgyagyasSzoba(102))
+szalloda.add_szoba(EgyagyasSzoba(103))
+szalloda.add_szoba(EgyagyasSzoba(104))
+szalloda.add_szoba(EgyagyasSzoba(105))
 szalloda.add_szoba(KetagyasSzoba(201))
 szalloda.add_szoba(KetagyasSzoba(202))
+szalloda.add_szoba(KetagyasSzoba(203))
+szalloda.add_szoba(KetagyasSzoba(204))
+szalloda.add_szoba(KetagyasSzoba(205))
 
 foglalaskezelo = FoglalasKezelo()
 foglalaskezelo.foglalas(szalloda.szobak[0], datetime(2024, 5, 1))
@@ -76,23 +87,33 @@ while True:
 
     if valasztas == "1":
         # Foglalás
+        print("Elérhető szobák száma (1-es számmal keződő, 1 ágyas szoba, 2-es számmal kezdőd 2 ágyas szoba):")
+        for sz in szalloda.szobak:
+            print(sz.szobaszam)
+        
         szobaszam = int(input("Adja meg a foglalni kívánt szoba számát: "))
         datum_str = input("Adja meg a foglalás dátumát (YYYY-MM-DD formátumban): ")
         datum = datetime.strptime(datum_str, "%Y-%m-%d")
 
-        szoba = None
-        for sz in szalloda.szobak:
-            if sz.szobaszam == szobaszam:
-                szoba = sz
-                break
+        if datetime(2024, 5, 11) <= datum <= datetime(2024, 5, 31):
+            szoba = None
+            for sz in szalloda.szobak:
+                if sz.szobaszam == szobaszam:
+                    szoba = sz
+                    break
 
-        if szoba:
-            if foglalaskezelo.foglalas(szoba, datum):
-                print("Foglalás sikeres.")
+            if szoba:
+                if foglalaskezelo.ellenoriz(szoba, datum):
+                    if foglalaskezelo.foglalas(szoba, datum):
+                        print("Foglalás sikeres.")
+                    else:
+                        print("A foglalás sikertelen.")
+                else:
+                    print("A foglalás sikertelen. A megadott dátumra és szobára már van foglalás.")
             else:
-                print("A foglalás sikertelen.")
+                print("Nincs ilyen szoba.")
         else:
-            print("Nincs ilyen szoba.")
+            print("Júniustól átépül a szállodánk, kérlek keresd kollégánkat telefonon a részletekért. A foglalás újraindul.")
 
     elif valasztas == "2":
         # Lemondás
